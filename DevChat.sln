@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat", "DevChat\DevChat\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat.Client", "DevChat\DevChat.Client\DevChat.Client.csproj", "{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat.Share", "DevChat\DevChat.Share\DevChat.Share.csproj", "{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

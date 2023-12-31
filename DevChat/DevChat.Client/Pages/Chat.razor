@@ -1,0 +1,20 @@
+﻿@page "/"
+@rendermode @(new InteractiveWebAssemblyRenderMode(false))
+@using DevChat.Client.Components
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>Chat</PageTitle>
+
+<FluentSplitter class="chat-page" Orientation="Orientation.Horizontal" Panel1Size="260px">
+    <Panel1>
+        <div class="chat-list-container">
+            <ChatList />
+        </div>
+    </Panel1>
+    <Panel2>
+        <div class="conversation-container">
+            <Conversation />
+        </div>
+    </Panel2>
+</FluentSplitter>

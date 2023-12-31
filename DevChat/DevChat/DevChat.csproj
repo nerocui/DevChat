@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DevChat.Client\DevChat.Client.csproj" />
+    <ProjectReference Include="..\DevChat.Share\DevChat.Share.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.*-*" />

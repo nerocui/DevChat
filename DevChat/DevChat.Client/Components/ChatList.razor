@@ -1,0 +1,79 @@
+﻿@inject HttpClient client
+@using System.Text.Json
+@using DevChat.Share.Dtos
+
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentStack
+        HorizontalGap="8"
+        Orientation="Orientation.Horizontal"
+        HorizontalAlignment="HorizontalAlignment.End">
+        <FluentButton
+            IconEnd="@(new Icons.Regular.Size24.Search())"
+            Title="Search" />
+        <FluentButton
+            Id="new-chat-button"
+            OnClick="@(() => newChatPopoverOpen = !newChatPopoverOpen)"
+            IconEnd="@(new Icons.Regular.Size24.Add())"
+            Title="New Chat"/>
+        <FluentPopover
+            Style="width: 260px;"
+            AnchorId="new-chat-button"
+            @bind-Open="newChatPopoverOpen"
+            HorizontalPosition="HorizontalPosition.Left">
+            <Header >
+                <p><b>New Chat</b></p>
+            </Header>
+            <Body>
+                <FluentStack
+                    HorizontalGap="4"
+                    Orientation="Orientation.Horizontal">
+                    <FluentTextField
+                        @bind-Value="newChatEmail"
+                        Placeholder="Enter email to search..."/>
+                    <FluentButton
+                        OnClick="@SearchNewChat"
+                        IconEnd="@(new Icons.Regular.Size24.Search())"
+                        Title="Search"/>
+                </FluentStack>
+            </Body>
+        </FluentPopover>
+    </FluentStack>
+    @if (displayingNewChatResult)
+    {
+        <ul>
+            @foreach (var user in newChatResult)
+            {
+                <li>
+                    @user.Email
+                </li>
+            }
+        </ul>
+    }
+</FluentStack>
+
+@code {
+    private bool newChatPopoverOpen = false;
+    private string newChatEmail { get; set; }
+    private bool displayingNewChatResult = false;
+    private ICollection<UserDtoForViewing> newChatResult;
+
+    private async Task SearchNewChat()
+    {
+        if (string.IsNullOrWhiteSpace(newChatEmail))
+        {
+            return;
+        }
+
+        var res = await client.GetAsync($"/conversation/GetUserByEmail?email={newChatEmail}");
+        var userJson = await res.Content.ReadAsStringAsync();
+        var user = JsonSerializer.Deserialize<UserDtoForViewing>(userJson, new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+        });
+        newChatResult = new List<UserDtoForViewing>
+        {
+            user
+        };
+        displayingNewChatResult = true;
+    }
+}

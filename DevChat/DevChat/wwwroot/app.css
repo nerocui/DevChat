@@ -174,3 +174,7 @@ code {
             display: block;
         }
 }
+
+.chat-page {
+    height: 100%;
+}

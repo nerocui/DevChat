@@ -25,4 +25,27 @@ public class Utilities
         // Return the hash string
         return hashString;
     }
+
+    public static string GenerateMessageSource(string html, string js, string css)
+    {
+        // Return the html page as a string
+        return $@"
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <style>
+                        {css}
+                    </style>
+                </head>
+                <body>
+                    <div id='message-body'>
+                        {html}
+                    </div>
+                    <script>
+                        {js}
+                    </script>
+                </body>
+            </html>
+        ";
+    }
 }
