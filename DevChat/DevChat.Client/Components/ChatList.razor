@@ -1,6 +1,7 @@
 ﻿@inject HttpClient client
 @using System.Text.Json
 @using DevChat.Share.Dtos
+@using DevChat.Client.FormModels
 
 <FluentStack Orientation="Orientation.Vertical">
     <FluentStack
@@ -24,56 +25,74 @@
                 <p><b>New Chat</b></p>
             </Header>
             <Body>
-                <FluentStack
-                    HorizontalGap="4"
-                    Orientation="Orientation.Horizontal">
-                    <FluentTextField
-                        @bind-Value="newChatEmail"
-                        Placeholder="Enter email to search..."/>
-                    <FluentButton
-                        OnClick="@SearchNewChat"
-                        IconEnd="@(new Icons.Regular.Size24.Search())"
-                        Title="Search"/>
-                </FluentStack>
+                <EditForm Model="@newChatSearch" OnValidSubmit="@SearchNewChat">
+                    <FluentStack
+                        HorizontalGap="4"
+                        Orientation="Orientation.Horizontal">
+                        <FluentTextField @bind-Value="newChatSearch.Email"
+                            Placeholder="Enter email to search..." />
+                        <FluentButton
+                            Type="ButtonType.Submit"
+                            IconEnd="@(new Icons.Regular.Size24.Search())"
+                            Title="Search" />
+                    </FluentStack>
+                </EditForm>
             </Body>
+            <Footer>
+                @if (searchingNewChat)
+                {
+                    <FluentProgress></FluentProgress>
+                }
+            </Footer>
         </FluentPopover>
     </FluentStack>
     @if (displayingNewChatResult)
     {
-        <ul>
-            @foreach (var user in newChatResult)
-            {
-                <li>
-                    @user.Email
-                </li>
-            }
-        </ul>
+        <FluentCard>
+            <FluentStack
+                Orientation="Orientation.Vertical"
+                VerticalGap="8">
+                <FluentLabel
+                    Typo="Typography.Header">
+                    Search Result
+                </FluentLabel>
+                <FluentLabel
+                    Typo="Typography.Body">
+                    Email: @newChatResult.Email
+                </FluentLabel>
+                <FluentButton
+                    Appearance="Appearance.Accent"
+                    IconEnd="@(new Icons.Regular.Size20.Send())"
+                    Title="Message">
+                    Message
+                </FluentButton>
+            </FluentStack>
+        </FluentCard>
     }
 </FluentStack>
 
 @code {
     private bool newChatPopoverOpen = false;
-    private string newChatEmail { get; set; }
+    private NewChatSearchModel newChatSearch { get; set; } = new();
     private bool displayingNewChatResult = false;
-    private ICollection<UserDtoForViewing> newChatResult;
+    private UserDtoForViewing newChatResult;
+    private bool searchingNewChat = false;
 
     private async Task SearchNewChat()
     {
-        if (string.IsNullOrWhiteSpace(newChatEmail))
-        {
-            return;
-        }
-
-        var res = await client.GetAsync($"/conversation/GetUserByEmail?email={newChatEmail}");
+        searchingNewChat = true;
+        // yields to the UI thread to render the loading UI
+        await Task.Delay(1);
+        var res = await client.GetAsync($"/conversation/GetUserByEmail?email={newChatSearch.Email}");
         var userJson = await res.Content.ReadAsStringAsync();
         var user = JsonSerializer.Deserialize<UserDtoForViewing>(userJson, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true,
         });
-        newChatResult = new List<UserDtoForViewing>
-        {
-            user
-        };
+        newChatResult = user;
+        searchingNewChat = false;
         displayingNewChatResult = true;
+        newChatPopoverOpen = false;
+        newChatSearch.Email = string.Empty;
     }
 }

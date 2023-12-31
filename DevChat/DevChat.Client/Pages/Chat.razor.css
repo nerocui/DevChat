@@ -1,7 +1,9 @@
 ﻿.chat-list-container {
     padding-right: 8px;
+    padding-top: 8px;
 }
 
 .conversation-container {
     padding-left: 8px;
+    padding-top: 8px;
 }

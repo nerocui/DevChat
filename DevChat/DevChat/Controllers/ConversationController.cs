@@ -58,7 +58,6 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
     public async Task<IActionResult> GetUserByEmail(string email)
     {
         var user = await userManager.FindByEmailAsync(email);
-
         return Ok(new UserDtoForViewing
         {
             Id = user.Id,
