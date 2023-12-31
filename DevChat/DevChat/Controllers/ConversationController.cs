@@ -51,6 +51,7 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
             }
         };
         await dbContext.ConversationMembers.AddRangeAsync(members);
+        await dbContext.SaveChangesAsync();
         return Ok(hash);
     }
 

@@ -1,5 +1,72 @@
-﻿<h3>Conversation</h3>
+﻿@using DevChat.Share.Dtos
+@using System.Text.Json
+@using System.Text
+@using DevChat.Client.FormModels
+@inject HttpClient client
+
+@if (loading)
+{
+    <FluentProgress></FluentProgress>
+}
+
+@foreach (var message in messages)
+{
+    <FluentCard Width="400px" Height="240px">
+        <iframe src="@($"/message/{message.ContentId}")"/>
+    </FluentCard>
+}
+
+<EditForm Model="@composeBox" OnValidSubmit="SendMessage">
+    <FluentTextArea @bind-Value="composeBox.Html"/>
+    <FluentTextArea @bind-Value="composeBox.Js" />
+    <FluentTextArea @bind-Value="composeBox.Css" />
+    <FluentButton
+        Type="ButtonType.Submit"
+        IconEnd="@(new Icons.Regular.Size20.Send())"
+        Title="Send"/>
+</EditForm>
 
 @code {
+    [Parameter]
+    public string? Id { get; set; }
+    private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
+    private bool loading = false;
+    private ComposeBoxModel composeBox = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessages();
+    }
+
+    private async Task LoadMessages()
+    {
+        loading = true;
+        await Task.Delay(1);
+        var res = await client.GetAsync($"/message/getpage?convId={Id}&skip={messages.Count}");
+        var newMessagesJson = await res.Content.ReadAsStringAsync();
+        var newMessages = JsonSerializer.Deserialize<ICollection<MessageDtoForViewing>>(newMessagesJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
+
+        foreach (var message in newMessages)
+        {
+            messages.Add(message);
+        }
+        loading = false;
+        StateHasChanged();
+    }
+
+    private async Task SendMessage()
+    {
+        var res = await client.PutAsync(
+            $"/message/send?convId={Id}",
+            new StringContent(JsonSerializer.Serialize(composeBox), Encoding.UTF8, "application/json")
+            );
+        if (res.IsSuccessStatusCode)
+        {
+            composeBox = new();
+            await LoadMessages();
+        }
+    }
 }
