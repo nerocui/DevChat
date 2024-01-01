@@ -63,7 +63,7 @@ public class MessageController(ApplicationDbContext dbContext, UserManager<Appli
         var user = await userManager.GetUserAsync(User);
         var messages = await dbContext.Messages
             .Where(message => message.ConvId == convId)
-            .OrderByDescending(message => message.CreatedAt)
+            .OrderBy(message => message.CreatedAt)
             .Skip(skip)
             .Take(25)// magic number, we fetch 25 per page
             .Include(message => message.FromUser)
