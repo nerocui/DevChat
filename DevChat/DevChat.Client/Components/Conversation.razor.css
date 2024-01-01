@@ -1,0 +1,8 @@
+﻿.messages-container {
+    flex: 1;
+    overflow: auto;
+}
+
+.message {
+    width: 100%;
+}

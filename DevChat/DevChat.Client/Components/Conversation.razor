@@ -8,23 +8,32 @@
 {
     <FluentProgress></FluentProgress>
 }
+<div class="messages-container">
+    <FluentStack
+        Orientation="Orientation.Vertical"
+        VerticalGap="8">
+        @foreach (var message in messages)
+        {
+            <div class="message">
+                <FluentCard Width="400px" Height="240px">
+                    <iframe src="@($"/message/{message.ContentId}")" />
+                </FluentCard>
+            </div>
+        }
+    </FluentStack>
+    
+</div>
+<div class="compose-container">
+    <EditForm Model="@composeBox" OnValidSubmit="SendMessage">
+        <FluentTextArea @bind-Value="composeBox.Html" />
+        <FluentTextArea @bind-Value="composeBox.Js" />
+        <FluentTextArea @bind-Value="composeBox.Css" />
+        <FluentButton Type="ButtonType.Submit"
+                        IconEnd="@(new Icons.Regular.Size20.Send())"
+                        Title="Send" />
+    </EditForm>
+</div>
 
-@foreach (var message in messages)
-{
-    <FluentCard Width="400px" Height="240px">
-        <iframe src="@($"/message/{message.ContentId}")"/>
-    </FluentCard>
-}
-
-<EditForm Model="@composeBox" OnValidSubmit="SendMessage">
-    <FluentTextArea @bind-Value="composeBox.Html"/>
-    <FluentTextArea @bind-Value="composeBox.Js" />
-    <FluentTextArea @bind-Value="composeBox.Css" />
-    <FluentButton
-        Type="ButtonType.Submit"
-        IconEnd="@(new Icons.Regular.Size20.Send())"
-        Title="Send"/>
-</EditForm>
 
 @code {
     [Parameter]
