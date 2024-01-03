@@ -6,3 +6,37 @@
 .message {
     width: 100%;
 }
+
+.compose-container {
+    padding: 4px;
+}
+
+.compose {
+    border: black solid 2px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+}
+
+.editors-container {
+    flex: 1;
+}
+
+.editors-flex {
+    display: flex;
+    flex-direction: row;
+}
+
+.editor-container {
+    flex: 1;
+    padding: 4px;
+}
+
+.right-border {
+    border-right: black solid 1px;
+}
+
+.send-button {
+    align-self: flex-end;
+    padding: 4px;
+}

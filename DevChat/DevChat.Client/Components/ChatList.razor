@@ -71,6 +71,17 @@
             </FluentStack>
         </FluentCard>
     }
+    else if (displayingChats)
+    {
+        <FluentListbox TOption="string" ValueChanged="@(convId => navigation.NavigateTo($"/conversation/{convId}"))">
+            @foreach (var conversation in conversations)
+            {
+                <FluentOption Value="@(conversation.Id)">
+                    @conversation.Title
+                </FluentOption>
+            }
+        </FluentListbox>
+    }
 </FluentStack>
 
 @code {
@@ -79,6 +90,18 @@
     private bool displayingNewChatResult = false;
     private UserDtoForViewing newChatResult;
     private bool searchingNewChat = false;
+    private bool displayingChats = true;
+    private ICollection<ConversationDtoForViewing> conversations { get; set; } = new List<ConversationDtoForViewing>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await client.GetAsync("/conversation/getall");
+        var convsJson = await res.Content.ReadAsStringAsync();
+        conversations = JsonSerializer.Deserialize<ICollection<ConversationDtoForViewing>>(convsJson, new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        });
+    }
 
     private async Task SearchNewChat()
     {
@@ -93,6 +116,7 @@
         });
         newChatResult = user;
         searchingNewChat = false;
+        displayingChats = false;
         displayingNewChatResult = true;
         newChatPopoverOpen = false;
         newChatSearch.Email = string.Empty;
@@ -103,6 +127,7 @@
         var email = newChatResult.Email;
         newChatResult = null;
         displayingNewChatResult = false;
+        displayingChats = true;
         var res = await client.PutAsync($"/conversation/create?email={email}", null);
         var convId = await res.Content.ReadAsStringAsync();
         //nav to chat with convId

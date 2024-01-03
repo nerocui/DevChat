@@ -2,6 +2,9 @@
 @using System.Text.Json
 @using System.Text
 @using DevChat.Client.FormModels
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using BlazorMonaco.Languages
 @inject HttpClient client
 
 @if (loading)
@@ -16,7 +19,7 @@
         {
             <div class="message">
                 <FluentCard Width="400px" Height="240px">
-                    <iframe src="@($"/message/{message.ContentId}")" />
+                    <iframe src="@($"/message/{message.ContentId}")" sandbox="allow-scripts allow-same-origin"/>
                 </FluentCard>
             </div>
         }
@@ -24,14 +27,28 @@
     
 </div>
 <div class="compose-container">
-    <EditForm Model="@composeBox" OnValidSubmit="SendMessage">
-        <FluentTextArea @bind-Value="composeBox.Html" />
-        <FluentTextArea @bind-Value="composeBox.Js" />
-        <FluentTextArea @bind-Value="composeBox.Css" />
-        <FluentButton Type="ButtonType.Submit"
-                        IconEnd="@(new Icons.Regular.Size20.Send())"
-                        Title="Send" />
-    </EditForm>
+    <div class="compose">
+        <div class="editors-container">
+            <div class="editors-flex">
+                <div class="editor-container right-border">
+                    <FluentLabel Typo="Typography.H5">HTML</FluentLabel>
+                    <StandaloneCodeEditor @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                </div>
+                <div class="editor-container right-border">
+                    <FluentLabel Typo="Typography.H5">JavaScript</FluentLabel>
+                    <StandaloneCodeEditor @ref="_jsEditor" Id="editor-instance-js" ConstructionOptions="JavascriptEditorConstructionOptions"/>
+                </div>
+                <div class="editor-container right-border">
+                    <FluentLabel Typo="Typography.H5">CSS</FluentLabel>
+                    <StandaloneCodeEditor @ref="_cssEditor" Id="editor-instance-css" ConstructionOptions="CssEditorConstructionOptions"/>
+                </div>
+            </div>
+            
+        </div>
+        <div class="send-button">
+            <FluentButton IconEnd="@(new Icons.Regular.Size20.Send())" OnClick="SendMessage"/>
+        </div>
+    </div>
 </div>
 
 
@@ -40,7 +57,11 @@
     public string? Id { get; set; }
     private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
     private bool loading = false;
-    private ComposeBoxModel composeBox = new();
+
+    private StandaloneCodeEditor _htmlEditor = null!;
+    private StandaloneCodeEditor _jsEditor = null!;
+    private StandaloneCodeEditor _cssEditor = null!;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,14 +89,61 @@
 
     private async Task SendMessage()
     {
+        var htmlModel = await _htmlEditor.GetModel();
+        var html = await htmlModel.GetValue(EndOfLinePreference.LF, true);
+        if (string.IsNullOrWhiteSpace(html.Trim()))
+        {
+            return;
+        }
+        var jsModel = await _jsEditor.GetModel();
+        var cssModel = await _cssEditor.GetModel();
+
+        var composeBox = new ComposeBoxModel()
+        {
+            Html = html,
+            Js = await jsModel.GetValue(EndOfLinePreference.LF, true),
+            Css = await cssModel.GetValue(EndOfLinePreference.LF, true),
+        };
         var res = await client.PutAsync(
             $"/message/send?convId={Id}",
             new StringContent(JsonSerializer.Serialize(composeBox), Encoding.UTF8, "application/json")
             );
         if (res.IsSuccessStatusCode)
         {
-            composeBox = new();
+            htmlModel.SetValue("");
+            jsModel.SetValue("");
+            cssModel.SetValue("");
             await LoadMessages();
         }
+    }
+
+    private StandaloneEditorConstructionOptions HTMLEditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Minimap = new(){ Enabled = false },
+                Language = "html",
+            };
+    }
+
+    private StandaloneEditorConstructionOptions JavascriptEditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Minimap = new(){ Enabled = false },
+                Language = "javascript",
+            };
+    }
+
+    private StandaloneEditorConstructionOptions CssEditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Minimap = new(){ Enabled = false },
+                Language = "css",
+            };
     }
 }

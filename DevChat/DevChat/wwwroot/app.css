@@ -178,3 +178,12 @@ code {
 .chat-page {
     height: 100%;
 }
+
+.monaco-editor-container { /* for all editor instances */
+    min-height: 100px;
+}
+
+.layout {
+    overflow: hidden;
+    position: fixed !important;
+}

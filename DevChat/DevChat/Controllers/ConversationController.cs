@@ -13,6 +13,24 @@ namespace DevChat.Controllers;
 [Authorize]
 public class ConversationController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager) : ControllerBase
 {
+    [HttpGet("getall")]
+    public async Task<IActionResult> GetAll()
+    {
+        var authenticatedUser = await userManager.GetUserAsync(User);
+        var conversations = await dbContext.Conversations
+            .Where(c => c.Members.Any(m => m.UserId == authenticatedUser.Id))
+            .ToListAsync();
+        return Ok(conversations.Select(c =>
+        
+            new ConversationDtoForViewing()
+            {
+                Id = c.Id,
+                Title = c.Title,
+                //ProfilePhtot
+            }
+        ));
+    }
+
     [HttpPut("create")]
     public async Task<IActionResult> Create(string email)
     {

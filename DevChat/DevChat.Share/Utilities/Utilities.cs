@@ -33,7 +33,7 @@ public class Utilities
             <!DOCTYPE html>
             <html>
                 <head>
-                    <style>
+                    <style type='text/css'>
                         {css}
                     </style>
                 </head>
