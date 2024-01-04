@@ -42,7 +42,7 @@
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">HTML</FluentLabel>
                     <div style="position: relative;">
-                        <StandaloneCodeEditor @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                        <StandaloneCodeEditor OnKeyUp="OnSend" @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
                     </div>
                 </div>
                 <div class="editor-container right-border">
@@ -79,6 +79,14 @@
     private StandaloneCodeEditor _cssEditor = null!;
 
     private HubConnection? hubConnection;
+
+    private async void OnSend(KeyboardEvent keyboardEvent)
+    {
+        if (keyboardEvent.CtrlKey && keyboardEvent.KeyCode == KeyCode.Enter)
+        {
+            await SendMessage();
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
