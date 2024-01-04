@@ -12,7 +12,7 @@
 }
 
 .compose {
-    border: black solid 2px;
+    border: #b1b1b1 solid 2px;
     border-radius: 8px;
     display: flex;
     flex-direction: row;
@@ -33,7 +33,7 @@
 }
 
 .right-border {
-    border-right: black solid 1px;
+    border-right: #b1b1b1 solid 1px;
 }
 
 .send-button {
