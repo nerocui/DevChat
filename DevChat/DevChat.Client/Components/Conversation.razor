@@ -37,15 +37,21 @@
             <div class="editors-flex">
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">HTML</FluentLabel>
-                    <StandaloneCodeEditor @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                    <div style="position: relative;">
+                        <StandaloneCodeEditor @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                    </div>
                 </div>
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">JavaScript</FluentLabel>
-                    <StandaloneCodeEditor @ref="_jsEditor" Id="editor-instance-js" ConstructionOptions="JavascriptEditorConstructionOptions"/>
+                    <div style="position: relative;">
+                        <StandaloneCodeEditor @ref="_jsEditor" Id="editor-instance-js" ConstructionOptions="JavascriptEditorConstructionOptions"/>
+                    </div>
                 </div>
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">CSS</FluentLabel>
-                    <StandaloneCodeEditor @ref="_cssEditor" Id="editor-instance-css" ConstructionOptions="CssEditorConstructionOptions"/>
+                    <div style="position: relative;">
+                        <StandaloneCodeEditor @ref="_cssEditor" Id="editor-instance-css" ConstructionOptions="CssEditorConstructionOptions"/>
+                    </div>
                 </div>
             </div>
             
