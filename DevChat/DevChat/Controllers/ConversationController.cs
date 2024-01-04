@@ -18,16 +18,20 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
     {
         var authenticatedUser = await userManager.GetUserAsync(User);
         var conversations = await dbContext.Conversations
+            .Include(c => c.Members)
+            .ThenInclude(m => m.User)
             .Where(c => c.Members.Any(m => m.UserId == authenticatedUser.Id))
             .ToListAsync();
         return Ok(conversations.Select(c =>
-        
-            new ConversationDtoForViewing()
+        {
+            var theOtherUser = c.Members.FirstOrDefault(m => m.UserId != authenticatedUser.Id).User;
+            return new ConversationDtoForViewing()
             {
                 Id = c.Id,
-                Title = c.Title,
-                //ProfilePhtot
-            }
+                Title = c.IsOneOnOne ? $"{theOtherUser.FirstName} {theOtherUser.LastName}" : c.Title,
+                AvatarUrl = c.AvatarUrl
+            };
+        }
         ));
     }
 
@@ -52,7 +56,9 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
             .AddAsync(new()
             {
                 Id = hash, // Important, the Id is unique per list of email
-                Title = email + ", " + authenticatedUser.Email,
+                Title = $"{targetUser.FirstName}, {authenticatedUser.FirstName}", //TODO: support group chat
+                IsOneOnOne = true,
+                AvatarUrl = $"/avatar/getconv/{hash}"
             });
 
         var members = new ConversationMember[]
@@ -80,7 +86,8 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
         return Ok(new UserDtoForViewing
         {
             Id = user.Id,
-            Email = user.Email
+            Email = user.Email,
+            AvatarUrl = user.AvatarUrl,
         });
     }
 }

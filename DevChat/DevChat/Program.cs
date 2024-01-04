@@ -3,6 +3,7 @@ using DevChat.Components;
 using DevChat.Components.Account;
 using DevChat.Controllers;
 using DevChat.Data;
+using DevChat.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
@@ -55,6 +56,7 @@ public class Program
             .AddDefaultTokenProviders();
 
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+        builder.Services.AddScoped<IAvatarService, DiceBearService>();
 
         var app = builder.Build();
 

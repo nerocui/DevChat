@@ -1,5 +1,5 @@
 ﻿@page "/"
-@page "/conversation/{Id}"
+@page "/chat/{Id}"
 @rendermode @(new InteractiveWebAssemblyRenderMode(false))
 @using DevChat.Client.Components
 @using Microsoft.AspNetCore.Authorization
@@ -10,7 +10,7 @@
 <FluentSplitter class="chat-page" Orientation="Orientation.Horizontal" Panel1Size="260px">
     <Panel1>
         <div class="chat-list-container">
-            <ChatList />
+            <ChatList Id="@Id"/>
         </div>
     </Panel1>
     <Panel2>

@@ -40,3 +40,24 @@
     align-self: flex-end;
     padding: 4px;
 }
+
+.message-row {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.right {
+    flex-direction: row-reverse;
+}
+
+.left {
+    flex-direction: row;
+}
+
+.message-row img {
+    width: 36px;
+    height: 36px;
+}

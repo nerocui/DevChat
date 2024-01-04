@@ -11,6 +11,7 @@
 {
     <FluentProgress></FluentProgress>
 }
+<div><p>Chat Title</p></div>
 <div class="messages-container">
     <FluentStack
         Orientation="Orientation.Vertical"
@@ -18,9 +19,13 @@
         @foreach (var message in messages)
         {
             <div class="message">
-                <FluentCard Width="400px" Height="240px">
-                    <iframe src="@($"/message/{message.ContentId}")" sandbox="allow-scripts allow-same-origin"/>
-                </FluentCard>
+                <div class="message-row @(message.IsFromYou ? "right" : "left")">
+                    <img src="@message.FromUserAvatarUrl"/>
+                    <FluentCard Width="400px" Height="240px">
+                        <iframe src="@($"/message/{message.ContentId}")" sandbox="allow-scripts allow-same-origin"/>
+                    </FluentCard>
+                </div>
+                
             </div>
         }
     </FluentStack>

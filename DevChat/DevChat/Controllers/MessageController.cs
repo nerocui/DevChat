@@ -73,8 +73,10 @@ public class MessageController(ApplicationDbContext dbContext, UserManager<Appli
             Id = message.Id,
             FromUserId = message.FromUserId,
             FromUserEmail = message.FromUser.Email,
+            FromUserAvatarUrl = message.FromUser.AvatarUrl,
             ConvId = message.ConvId,
             ContentId = message.ContentId,
+            IsFromYou = message.FromUserId == user?.Id,
             CreatedAt = message.CreatedAt,
         }));
     }

@@ -187,3 +187,8 @@ code {
     overflow: hidden;
     position: fixed !important;
 }
+
+.conversation-list-box {
+    width: 100%;
+    overflow-x: hidden;
+}

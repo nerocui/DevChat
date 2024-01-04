@@ -1,0 +1,30 @@
+﻿.conversation-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+}
+
+.conversation-item p {
+    align-self: center;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.conversation-item img {
+    align-self: center;
+    width: 28px;
+    height: 28px;
+}
+
+.chat-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+}

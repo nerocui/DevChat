@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Message> Messages { get; set; }
     public DbSet<ConversationMember> ConversationMembers { get; set; }
     public DbSet<ProgrammableContent> ProgrammableContents { get; set; }
+    public DbSet<Avatar> Avatars { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -53,5 +54,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(message => message.ContentId);
 
         builder.Entity<ProgrammableContent>();
+        builder.Entity<Avatar>();
     }
 }
