@@ -19,4 +19,9 @@ public class MessageHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, convId);
     }
+
+    public async Task IndicateTyping(string convId)
+    {
+        await Clients.Group(convId).SendAsync("IndicateTyping", Context.UserIdentifier);
+    }
 }

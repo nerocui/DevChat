@@ -36,13 +36,14 @@
     
 </div>
 <div class="compose-container">
+    <div><p>@isTyping</p></div>
     <div class="compose">
         <div class="editors-container">
             <div class="editors-flex">
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">HTML</FluentLabel>
                     <div style="position: relative;">
-                        <StandaloneCodeEditor OnKeyUp="OnSend" @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                        <StandaloneCodeEditor OnKeyDown="OnKeyDown" OnKeyUp="OnSend" @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
                     </div>
                 </div>
                 <div class="editor-container right-border">
@@ -79,6 +80,44 @@
     private StandaloneCodeEditor _cssEditor = null!;
 
     private HubConnection? hubConnection;
+    private string isTyping { get; set; } = "";
+
+    // Declare a timer and a throttle time
+    private Timer _timer;
+    private const int _throttleTime = 5000; // 5 seconds
+
+    private Timer _receiveTimer;
+    private const int _receiveThrottleTime = 5000; // 5 seconds
+
+    // This helper method disposes the timer and clears the isTyping string
+    private void ClearTypingIndicator(object state)
+    {
+        _receiveTimer.Dispose();
+        _receiveTimer = null;
+        isTyping = "";
+        InvokeAsync(StateHasChanged);
+    }
+
+    // This function is called on every keydown event
+    private void OnKeyDown(KeyboardEvent args)
+    {
+        // Check if the timer is already running
+        if (_timer != null) return;
+
+        // Create a new timer that will call IndicateTyping after the throttle time
+        _timer = new Timer(IndicateTyping, null, _throttleTime, Timeout.Infinite);
+    }
+
+    // This function is called when the user is constantly typing
+    private void IndicateTyping(object state)
+    {
+        // Do something to indicate typing, such as showing a message or an icon
+        hubConnection.InvokeAsync("IndicateTyping", Id);
+
+        // Dispose the timer
+        _timer.Dispose();
+        _timer = null;
+    }
 
     private async void OnSend(KeyboardEvent keyboardEvent)
     {
@@ -118,6 +157,19 @@
             messages.Add(message);
             InvokeAsync(StateHasChanged);
             ScrollToBottom();
+        });
+
+        hubConnection.On<string>("IndicateTyping", (userId) =>
+        {
+            // Dispose the previous timer if it exists
+            _receiveTimer?.Dispose();
+
+            // Create a new timer that will call the helper method after the throttle time
+            _receiveTimer = new Timer(ClearTypingIndicator, null, _throttleTime, Timeout.Infinite);
+
+            // Set the isTyping string to show the user name
+            isTyping = $"{userId} is typing...";
+            InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
