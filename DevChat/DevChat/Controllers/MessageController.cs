@@ -45,15 +45,15 @@ public class MessageController(ApplicationDbContext dbContext, UserManager<Appli
             ContentId = contentEntity.Entity.Id,
         });
         await dbContext.SaveChangesAsync();
-        //messageHub.Clients.Groups(convId).SendAsync("ReceiveMessage", new MessageDtoForViewing
-        //{
-        //    Id = messageEntity.Entity.Id,
-        //    FromUserId = user.Id,
-        //    FromUserEmail = user.Email,
-        //    ConvId = convId,
-        //    ContentId = contentEntity.Entity.Id,
-        //    CreatedAt = messageEntity.Entity.CreatedAt,
-        //});
+        messageHub.Clients.Groups(convId).SendAsync("ReceiveMessage", new MessageDtoForViewing
+        {
+            Id = messageEntity.Entity.Id,
+            FromUserId = user.Id,
+            FromUserEmail = user.Email,
+            ConvId = convId,
+            ContentId = contentEntity.Entity.Id,
+            CreatedAt = messageEntity.Entity.CreatedAt,
+        });
         return Ok();
     }
 

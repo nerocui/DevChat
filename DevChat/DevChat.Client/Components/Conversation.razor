@@ -5,7 +5,11 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
+@using Microsoft.AspNetCore.SignalR.Client
 @inject HttpClient client
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 @if (loading)
 {
@@ -66,6 +70,7 @@
 @code {
     [Parameter]
     public string? Id { get; set; }
+    private IJSObjectReference? module;
     private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
     private bool loading = false;
 
@@ -73,10 +78,42 @@
     private StandaloneCodeEditor _jsEditor = null!;
     private StandaloneCodeEditor _cssEditor = null!;
 
+    private HubConnection? hubConnection;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./Components/Conversation.razor.js");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadMessages();
+        await SubscribeToMessages();
+    }
+
+    private async Task SubscribeToMessages()
+    {
+        if (string.IsNullOrWhiteSpace(Id))
+        {
+            return;
+        }
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/MessageHub"))
+            .Build();
+
+        hubConnection.On<string, MessageDtoForViewing>("ReceiveMessage", (user, message) =>
+        {
+            messages.Add(message);
+            InvokeAsync(StateHasChanged);
+            ScrollToBottom();
+        });
+
+        await hubConnection.StartAsync();
+        await hubConnection.InvokeAsync("AddToGroup", Id);
     }
 
     private async Task LoadMessages()
@@ -96,6 +133,7 @@
         }
         loading = false;
         StateHasChanged();
+        ScrollToBottom();
     }
 
     private async Task SendMessage()
@@ -128,6 +166,11 @@
         }
     }
 
+    private async void ScrollToBottom()
+    {
+        module.InvokeVoidAsync("scrollToBottom");
+    }
+
     private StandaloneEditorConstructionOptions HTMLEditorConstructionOptions(StandaloneCodeEditor editor)
     {
         return new StandaloneEditorConstructionOptions
@@ -156,5 +199,13 @@
                 Minimap = new(){ Enabled = false },
                 Language = "css",
             };
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
     }
 }
