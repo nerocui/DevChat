@@ -5,13 +5,18 @@ using DevChat.Share.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size16;
 
 namespace DevChat.Controllers;
 
 [Route("conversation")]
 [Authorize]
-public class ConversationController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager) : ControllerBase
+public class ConversationController(
+    ApplicationDbContext dbContext,
+    UserManager<ApplicationUser> userManager,
+    IHubContext<NotificationHub> notificationHub) : ControllerBase
 {
     [HttpGet("getall")]
     public async Task<IActionResult> GetAll()
@@ -76,6 +81,12 @@ public class ConversationController(ApplicationDbContext dbContext, UserManager<
         };
         await dbContext.ConversationMembers.AddRangeAsync(members);
         await dbContext.SaveChangesAsync();
+        await notificationHub.Clients.User(targetUser.Id).SendAsync("NewChatCreated", new ConversationDtoForViewing()
+        {
+            Id = hash,
+            Title = $"{authenticatedUser.FirstName} {authenticatedUser.LastName}",
+            AvatarUrl = $"/avatar/getconv/{hash}"
+        });
         return Ok(hash);
     }
 

@@ -12,7 +12,10 @@ namespace DevChat.Controllers;
 
 [Route("message")]
 [Authorize]
-public class MessageController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, IHubContext<MessageHub> messageHub) : ControllerBase
+public class MessageController(
+    ApplicationDbContext dbContext,
+    UserManager<ApplicationUser> userManager,
+    IHubContext<MessageHub> messageHub) : ControllerBase
 {
     [HttpGet("{id}")]
     [Produces("text/html")]

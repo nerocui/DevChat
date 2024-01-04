@@ -2,7 +2,9 @@
 @using System.Text.Json
 @using DevChat.Share.Dtos
 @using DevChat.Client.FormModels
-@inject NavigationManager navigation
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
 
 <div class="chat-list">
     <FluentStack
@@ -77,7 +79,7 @@
             Class="conversation-list-box"
             TOption="string"
             OptionSelected="IsSelected"
-            ValueChanged="@(convId => navigation.NavigateTo($"/chat/{convId}"))">
+            ValueChanged="@(convId => Navigation.NavigateTo($"/chat/{convId}"))">
             @foreach (var conversation in conversations)
             {
                 <FluentOption Selected="@(conversation.Id == Id)" Class="conversation-item-option" Value="@(conversation.Id)">
@@ -102,6 +104,23 @@
     private bool displayingChats = true;
     private ICollection<ConversationDtoForViewing> conversations { get; set; } = new List<ConversationDtoForViewing>();
 
+    private HubConnection? hubConnection;
+
+    private async Task SubscribeToNewChats()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/NotificationHub"))
+            .Build();
+
+        hubConnection.On<ConversationDtoForViewing>("NewChatCreated", (conversation) =>
+        {
+            conversations.Add(conversation);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var res = await client.GetAsync("/conversation/getall");
@@ -110,6 +129,7 @@
         {
             PropertyNameCaseInsensitive = true
         });
+        await SubscribeToNewChats();
     }
 
     private async Task SearchNewChat()
@@ -140,11 +160,19 @@
         var res = await client.PutAsync($"/conversation/create?email={email}", null);
         var convId = await res.Content.ReadAsStringAsync();
         //nav to chat with convId
-        navigation.NavigateTo($"/chat/{convId}");
+        Navigation.NavigateTo($"/chat/{convId}");
     }
 
     private bool IsSelected(string convId)
     {
         return convId == Id;
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 }

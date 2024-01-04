@@ -263,6 +263,8 @@
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        await hubConnection.InvokeAsync("RemoveFromGroup", Id);
+        await hubConnection.DisposeAsync();
         if (module is not null)
         {
             await module.DisposeAsync();
