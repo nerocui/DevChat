@@ -48,11 +48,12 @@ public class MessageController(
             ContentId = contentEntity.Entity.Id,
         });
         await dbContext.SaveChangesAsync();
-        messageHub.Clients.Groups(convId).SendAsync("ReceiveMessage", new MessageDtoForViewing
+        await messageHub.Clients.Groups(convId).SendAsync("ReceiveMessage", new MessageDtoForViewing
         {
             Id = messageEntity.Entity.Id,
             FromUserId = user.Id,
             FromUserEmail = user.Email,
+            FromUserAvatarUrl = user.AvatarUrl,
             ConvId = convId,
             ContentId = contentEntity.Entity.Id,
             CreatedAt = messageEntity.Entity.CreatedAt,

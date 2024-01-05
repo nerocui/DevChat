@@ -152,10 +152,11 @@
             .WithUrl(Navigation.ToAbsoluteUri("/MessageHub"))
             .Build();
 
-        hubConnection.On<string, MessageDtoForViewing>("ReceiveMessage", (user, message) =>
+        hubConnection.On<MessageDtoForViewing>("ReceiveMessage", async (message) =>
         {
             messages.Add(message);
-            InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(1);
             ScrollToBottom();
         });
 
