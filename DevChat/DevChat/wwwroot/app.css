@@ -179,8 +179,8 @@ code {
     height: 100%;
 }
 
-.monaco-editor-container { /* for all editor instances */
-    height: 100px;
+.CodeMirror { /* for all editor instances */
+    height: 100px !important;
 }
 
 .layout {

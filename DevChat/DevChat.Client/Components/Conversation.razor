@@ -2,9 +2,7 @@
 @using System.Text.Json
 @using System.Text
 @using DevChat.Client.FormModels
-@using BlazorMonaco
-@using BlazorMonaco.Editor
-@using BlazorMonaco.Languages
+@using DevChat.Client.Services
 @using Microsoft.AspNetCore.SignalR.Client
 @inject HttpClient client
 @inject NavigationManager Navigation
@@ -43,19 +41,19 @@
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">HTML</FluentLabel>
                     <div style="position: relative;">
-                        <StandaloneCodeEditor OnKeyDown="OnKeyDown" OnKeyUp="OnSend" @ref="_htmlEditor" Id="editor-instance-html" ConstructionOptions="HTMLEditorConstructionOptions"/>
+                        <textarea id="code-mirror-editor-html"/>
                     </div>
                 </div>
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">JavaScript</FluentLabel>
                     <div style="position: relative;">
-                        <StandaloneCodeEditor @ref="_jsEditor" Id="editor-instance-js" ConstructionOptions="JavascriptEditorConstructionOptions"/>
+                        <textarea id="code-mirror-editor-js"/>
                     </div>
                 </div>
                 <div class="editor-container right-border">
                     <FluentLabel Typo="Typography.H5">CSS</FluentLabel>
                     <div style="position: relative;">
-                        <StandaloneCodeEditor @ref="_cssEditor" Id="editor-instance-css" ConstructionOptions="CssEditorConstructionOptions"/>
+                        <textarea id="code-mirror-editor-css"/>
                     </div>
                 </div>
             </div>
@@ -74,10 +72,6 @@
     private IJSObjectReference? module;
     private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
     private bool loading = false;
-
-    private StandaloneCodeEditor _htmlEditor = null!;
-    private StandaloneCodeEditor _jsEditor = null!;
-    private StandaloneCodeEditor _cssEditor = null!;
 
     private HubConnection? hubConnection;
     private string isTyping { get; set; } = "";
@@ -98,8 +92,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    // This function is called on every keydown event
-    private void OnKeyDown(KeyboardEvent args)
+    public void OnKeyDown()
     {
         // Check if the timer is already running
         if (_timer != null) return;
@@ -119,20 +112,19 @@
         _timer = null;
     }
 
-    private async void OnSend(KeyboardEvent keyboardEvent)
+    public async void OnSendKeyEvent()
     {
-        if (keyboardEvent.CtrlKey && keyboardEvent.KeyCode == KeyCode.Enter)
-        {
-            await SendMessage();
-        }
+        await SendMessage();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            CodeMirrorService.Register(this);
             module = await JS.InvokeAsync<IJSObjectReference>(
                 "import", "./Components/Conversation.razor.js");
+            await module.InvokeVoidAsync("initializeEditor");
         }
     }
 
@@ -199,20 +191,20 @@
 
     private async Task SendMessage()
     {
-        var htmlModel = await _htmlEditor.GetModel();
-        var html = await htmlModel.GetValue(EndOfLinePreference.LF, true);
+        var html = await module.InvokeAsync<string>("getHtmlString");
         if (string.IsNullOrWhiteSpace(html.Trim()))
         {
             return;
         }
-        var jsModel = await _jsEditor.GetModel();
-        var cssModel = await _cssEditor.GetModel();
+
+        var js = await module.InvokeAsync<string>("getJsString");
+        var css = await module.InvokeAsync<string>("getCssString");
 
         var composeBox = new ComposeBoxModel()
         {
             Html = html,
-            Js = await jsModel.GetValue(EndOfLinePreference.LF, true),
-            Css = await cssModel.GetValue(EndOfLinePreference.LF, true),
+            Js = js,
+            Css = css,
         };
         var res = await client.PutAsync(
             $"/message/send?convId={Id}",
@@ -220,9 +212,9 @@
             );
         if (res.IsSuccessStatusCode)
         {
-            htmlModel.SetValue("");
-            jsModel.SetValue("");
-            cssModel.SetValue("");
+            await module.InvokeVoidAsync("resetHtmlString");
+            await module.InvokeVoidAsync("resetJsString");
+            await module.InvokeVoidAsync("resetCssString");
             await LoadMessages();
         }
     }
@@ -232,38 +224,9 @@
         module.InvokeVoidAsync("scrollToBottom");
     }
 
-    private StandaloneEditorConstructionOptions HTMLEditorConstructionOptions(StandaloneCodeEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Minimap = new(){ Enabled = false },
-                Language = "html",
-            };
-    }
-
-    private StandaloneEditorConstructionOptions JavascriptEditorConstructionOptions(StandaloneCodeEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Minimap = new(){ Enabled = false },
-                Language = "javascript",
-            };
-    }
-
-    private StandaloneEditorConstructionOptions CssEditorConstructionOptions(StandaloneCodeEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Minimap = new(){ Enabled = false },
-                Language = "css",
-            };
-    }
-
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        CodeMirrorService.Unregister(this);
         await hubConnection.InvokeAsync("RemoveFromGroup", Id);
         await hubConnection.DisposeAsync();
         if (module is not null)
