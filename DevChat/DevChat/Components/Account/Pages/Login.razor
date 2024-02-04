@@ -12,13 +12,14 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<FluentGrid>
-    <FluentGridItem xs="8" sm="4">
+<FluentGrid
+    Style="margin-top: 12px"
+    Justify="JustifyContent.Center">
+    <FluentGridItem xs="10" sm="8" md="6" lg="4" xl="4" xxl="2">
         <StatusMessage Message="@errorMessage" />
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
-            <h2>Use a local account to log in.</h2>
+            <h2>Log in</h2>
             <hr />
             <FluentValidationSummary class="text-danger" role="alert" />
             <FluentStack Orientation="Orientation.Vertical">
@@ -30,23 +31,23 @@
                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in</FluentButton>
                 <div>
                     <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ForgotPassword">Forgot your password?</FluentAnchor>
+                        <FluentAnchor Appearance="Appearance.Stealth" Href="Account/ForgotPassword">Forgot your password?</FluentAnchor>
                     </p>
                     <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</FluentAnchor>
+                        <FluentAnchor Appearance="Appearance.Stealth" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</FluentAnchor>
                     </p>
                     <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ResendEmailConfirmation">Resend email confirmation</FluentAnchor>
+                        <FluentAnchor Appearance="Appearance.Stealth" Href="Account/ResendEmailConfirmation">Resend email confirmation</FluentAnchor>
                     </p>
                 </div>
             </FluentStack>
         </EditForm>
     </FluentGridItem>
-    <FluentGridItem xs="12" sm="8">
+@*     <FluentGridItem xs="12" sm="8">
         <h3>Use another service to log in.</h3>
         <hr />
         <ExternalLoginPicker />
-    </FluentGridItem>
+    </FluentGridItem> *@
 </FluentGrid>
 
 @code {

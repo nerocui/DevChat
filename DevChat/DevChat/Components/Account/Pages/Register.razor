@@ -19,10 +19,10 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
-
-<FluentGrid>
-    <FluentGridItem xs="8" sm="4">
+<FluentGrid
+    Style="margin-top: 12px"
+    Justify="JustifyContent.Center">
+    <FluentGridItem xs="10" sm="8" md="6" lg="4" xl="4" xxl="2">
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
@@ -44,11 +44,11 @@
             </FluentStack>
         </EditForm>
     </FluentGridItem>
-    <FluentGridItem xs="12" sm="8">
+@*     <FluentGridItem xs="12" sm="8">
         <h3>Use another service to log in.</h3>
         <hr />
         <ExternalLoginPicker />
-    </FluentGridItem>
+    </FluentGridItem> *@
 </FluentGrid>
 
 @code {

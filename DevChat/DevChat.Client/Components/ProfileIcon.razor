@@ -1,0 +1,49 @@
+﻿@using DevChat.Share.Dtos
+@using System.Text.Json
+@inject HttpClient client
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(false))
+
+@if (User is not null)
+{
+    <div class="profile-icon-container">
+        <button @onclick="TogglePopover"
+                id="persona-btn">
+            <FluentPersona Image="@(User.AvatarUrl)"
+                           Name="@(User.FirstName + " " + User.LastName)"
+                           ImageSize="32px" />
+        </button>
+        <FluentPopover AnchorId="persona-btn"
+                       @bind-Open="ProfilePopoverOpen">
+            <Body>
+                <form action="Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <FluentButton Appearance="Appearance.Outline" Type="ButtonType.Submit" Style="width: 100%;">Logout</FluentButton>
+                </form>
+            </Body>
+        </FluentPopover>
+    </div>
+}
+
+@code {
+    private UserDtoForViewing? User;
+    private bool ProfilePopoverOpen;
+    private string? currentUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var res = await client.GetAsync("/user/GetAuthenticatedUser");
+        var json = await res.Content.ReadAsStringAsync();
+        User = JsonSerializer.Deserialize<UserDtoForViewing>(json, new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        });
+    }
+
+    private void TogglePopover()
+    {
+        ProfilePopoverOpen = !ProfilePopoverOpen;
+    }
+}

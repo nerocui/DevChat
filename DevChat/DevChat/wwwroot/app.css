@@ -185,10 +185,24 @@ code {
 
 .layout {
     overflow: hidden;
-    position: fixed !important;
+    /*position: fixed !important;*/
 }
 
 .conversation-list-box {
     width: 100%;
     overflow-x: hidden;
+}
+
+.profile-icon-container .fluent-popover-content {
+    width: 128px !important;
+    padding: 4px !important;
+}
+
+.profile-icon-container .fluent-popover-body {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.profile-icon-container > fluent-anchored-region > div {
+    border-radius: 4px;
 }

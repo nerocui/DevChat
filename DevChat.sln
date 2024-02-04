@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34407.89
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat", "DevChat\DevChat\DevChat.csproj", "{75D43F97-C1D0-4A62-873A-F7076729443B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevChat", "DevChat\DevChat\DevChat.csproj", "{75D43F97-C1D0-4A62-873A-F7076729443B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat.Client", "DevChat\DevChat.Client\DevChat.Client.csproj", "{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevChat.Client", "DevChat\DevChat.Client\DevChat.Client.csproj", "{BB3BBA7E-0913-41A8-81C7-3E6FE2CBA356}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevChat.Share", "DevChat\DevChat.Share\DevChat.Share.csproj", "{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevChat.Share", "DevChat\DevChat.Share\DevChat.Share.csproj", "{EF36A8BE-FFCD-42C8-941C-B174BE2E3647}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
