@@ -1,6 +1,7 @@
-﻿@using DevChat.Share.Dtos
+﻿@using DevChat.Client.Services
+@using DevChat.Share.Dtos
 @using System.Text.Json
-@inject HttpClient client
+@inject UserService userService
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(false))
 
@@ -34,12 +35,7 @@
     protected override async Task OnInitializedAsync()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        var res = await client.GetAsync("/user/GetAuthenticatedUser");
-        var json = await res.Content.ReadAsStringAsync();
-        User = JsonSerializer.Deserialize<UserDtoForViewing>(json, new JsonSerializerOptions()
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        User = await userService.GetAuthenticatedUser();
     }
 
     private void TogglePopover()

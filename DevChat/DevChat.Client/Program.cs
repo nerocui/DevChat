@@ -1,4 +1,5 @@
 using DevChat.Client;
+using DevChat.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -14,4 +15,5 @@ builder.Services.AddScoped(sp =>
     {
         BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
     });
+builder.Services.AddScoped<UserService>();
 await builder.Build().RunAsync();

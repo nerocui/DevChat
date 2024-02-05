@@ -5,6 +5,7 @@
 @using DevChat.Client.Services
 @using Microsoft.AspNetCore.SignalR.Client
 @inject HttpClient client
+@inject UserService userService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @implements IAsyncDisposable
@@ -69,6 +70,7 @@
 @code {
     [Parameter]
     public string? Id { get; set; }
+    private UserDtoForViewing User;
     private IJSObjectReference? module;
     private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
     private bool loading = false;
@@ -98,7 +100,7 @@
         if (_timer != null) return;
 
         // Create a new timer that will call IndicateTyping after the throttle time
-        _timer = new Timer(IndicateTyping, null, _throttleTime, Timeout.Infinite);
+        _timer = new Timer(IndicateTyping, null, 0, _throttleTime);
     }
 
     // This function is called when the user is constantly typing
@@ -130,8 +132,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadMessages();
-        await SubscribeToMessages();
+        if (Id is not null)
+        {
+            User = await userService.GetAuthenticatedUser();
+            await userService.GetUsersByConvId(Id);
+            await LoadMessages();
+            await SubscribeToMessages();
+        }
     }
 
     private async Task SubscribeToMessages()
@@ -146,13 +153,14 @@
 
         hubConnection.On<MessageDtoForViewing>("ReceiveMessage", async (message) =>
         {
+            message.IsFromYou = User.Id == message.FromUserId;
             messages.Add(message);
             await InvokeAsync(StateHasChanged);
             await Task.Delay(1);
             ScrollToBottom();
         });
 
-        hubConnection.On<string>("IndicateTyping", (userId) =>
+        hubConnection.On<string>("IndicateTyping", async (userId) =>
         {
             // Dispose the previous timer if it exists
             _receiveTimer?.Dispose();
@@ -161,7 +169,11 @@
             _receiveTimer = new Timer(ClearTypingIndicator, null, _throttleTime, Timeout.Infinite);
 
             // Set the isTyping string to show the user name
-            isTyping = $"{userId} is typing...";
+            if (userId != User.Id)
+            {
+                var typingUser = await userService.GetUser(userId);
+                isTyping = $"{typingUser.FirstName} {typingUser.LastName} is typing...";
+            }
             InvokeAsync(StateHasChanged);
         });
 
