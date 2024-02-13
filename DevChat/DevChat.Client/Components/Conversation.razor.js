@@ -1,5 +1,16 @@
 ﻿export const scrollToBottom = () => {
-    const messages = document.getElementsByClassName("message");
+    const messages = document.getElementsByClassName("message-list-item");
+    if (messages && messages.length != 0) {
+        messages[messages.length - 1].scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest"
+        });
+    }
+}
+
+export const scrollToNewBottom = () => {
+    const messages = document.getElementsByClassName("message-new-bottom");
     if (messages && messages.length != 0) {
         messages[messages.length - 1].scrollIntoView({
             behavior: "smooth",
@@ -97,3 +108,12 @@ export const resetCssString = () => {
     editorInstance.cssEditor?.setValue("");
 }
 
+// A function that checks if a string is html
+export const isHtml = (str) => {
+    // Create a temporary element
+    let temp = document.createElement("div");
+    // Set the innerHTML of the element to the string
+    temp.innerHTML = str;
+    // If the element has any child nodes, it means the string is html
+    return temp.childNodes.length > 0;
+}

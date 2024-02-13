@@ -7,6 +7,12 @@
     width: 100%;
 }
 
+.message-metadata {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .compose-container {
     padding: 4px;
 }
@@ -60,4 +66,15 @@
 .message-row img {
     width: 36px;
     height: 36px;
+}
+
+.more-btn-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.devider {
+    height: 8px;
+    width: 100%;
 }

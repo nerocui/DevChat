@@ -51,9 +51,14 @@ public class MessageController(
         await messageHub.Clients.Groups(convId).SendAsync("ReceiveMessage", new MessageDtoForViewing
         {
             Id = messageEntity.Entity.Id,
-            FromUserId = user.Id,
-            FromUserEmail = user.Email,
-            FromUserAvatarUrl = user.AvatarUrl,
+            Sender = new()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                AvatarUrl = user.AvatarUrl,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            },
             ConvId = convId,
             ContentId = contentEntity.Entity.Id,
             CreatedAt = messageEntity.Entity.CreatedAt,
@@ -67,21 +72,30 @@ public class MessageController(
         var user = await userManager.GetUserAsync(User);
         var messages = await dbContext.Messages
             .Where(message => message.ConvId == convId)
-            .OrderBy(message => message.CreatedAt)
+            .OrderByDescending(message => message.CreatedAt)
             .Skip(skip)
             .Take(25)// magic number, we fetch 25 per page
             .Include(message => message.FromUser)
             .ToListAsync();
-        return Ok(messages.Select(message => new MessageDtoForViewing
+        var messagesToReturn = messages.Select(message => new MessageDtoForViewing
         {
             Id = message.Id,
-            FromUserId = message.FromUserId,
-            FromUserEmail = message.FromUser.Email,
-            FromUserAvatarUrl = message.FromUser.AvatarUrl,
+            Sender = new()
+            {
+                Id = message.FromUser.Id,
+                Email = message.FromUser.Email,
+                AvatarUrl = message.FromUser.AvatarUrl,
+                FirstName = message.FromUser.FirstName,
+                LastName = message.FromUser.LastName,
+            },
             ConvId = message.ConvId,
             ContentId = message.ContentId,
             IsFromYou = message.FromUserId == user?.Id,
             CreatedAt = message.CreatedAt,
-        }));
+        }).ToList();
+
+        messagesToReturn.Sort((a, b) => a.CreatedAt.CompareTo(b.CreatedAt));
+
+        return Ok(messagesToReturn);
     }
 }

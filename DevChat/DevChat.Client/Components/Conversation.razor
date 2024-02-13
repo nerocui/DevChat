@@ -14,21 +14,31 @@
 {
     <FluentProgress></FluentProgress>
 }
-<div><p>Chat Title</p></div>
 <div class="messages-container">
     <FluentStack
         Orientation="Orientation.Vertical"
         VerticalGap="8">
+        <div class="more-btn-container">
+            <FluentButton OnClick="LoadMore">
+                Load More
+            </FluentButton>
+        </div>
         @foreach (var message in messages)
         {
-            <div class="message">
+            <div class=@($"message message-list-item {(message.NewlyLoadedBottom ? "message-new-bottom" : "")}")>
                 <div class="message-row @(message.IsFromYou ? "right" : "left")">
-                    <img src="@message.FromUserAvatarUrl"/>
+                    <img src="@message.Sender.AvatarUrl"/>
                     <FluentCard Width="400px" Height="240px">
-                        <iframe src="@($"/message/{message.ContentId}")" sandbox="allow-scripts allow-same-origin"/>
+                        <div class="message-metadata">
+                            <p>@($"{message.Sender.FirstName} {message.Sender.LastName}")</p>
+                            <p>@($"{message.CreatedAt.Hour}:{message.CreatedAt.Minute}")</p>
+                        </div>
+                        <iframe loading="lazy" src="@($"/message/{message.ContentId}")" sandbox="allow-scripts allow-same-origin"/>
                     </FluentCard>
                 </div>
-                
+            </div>
+            <div class="devider message-list-item">
+
             </div>
         }
     </FluentStack>
@@ -72,7 +82,7 @@
     public string? Id { get; set; }
     private UserDtoForViewing User;
     private IJSObjectReference? module;
-    private ICollection<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
+    private List<MessageDtoForViewing> messages = new List<MessageDtoForViewing>();
     private bool loading = false;
 
     private HubConnection? hubConnection;
@@ -153,7 +163,7 @@
 
         hubConnection.On<MessageDtoForViewing>("ReceiveMessage", async (message) =>
         {
-            message.IsFromYou = User.Id == message.FromUserId;
+            message.IsFromYou = User.Id == message.Sender.Id;
             messages.Add(message);
             await InvokeAsync(StateHasChanged);
             await Task.Delay(1);
@@ -236,6 +246,11 @@
         module.InvokeVoidAsync("scrollToBottom");
     }
 
+    private async void ScrollToNewlyLoadedBottom()
+    {
+        module.InvokeVoidAsync("scrollToNewBottom");
+    }
+
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         CodeMirrorService.Unregister(this);
@@ -245,5 +260,31 @@
         {
             await module.DisposeAsync();
         }
+    }
+
+    private async void LoadMore()
+    {
+        var res = await client.GetAsync($"/message/getpage?convId={Id}&skip={messages.Count}");
+        var newMessagesJson = await res.Content.ReadAsStringAsync();
+        var newMessages = JsonSerializer.Deserialize<List<MessageDtoForViewing>>(newMessagesJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
+
+        if (newMessages.Count == 0)
+        {
+            return;
+        }
+
+        for (var i = 0; i < newMessages.Count; i++)
+        {
+            if (i == newMessages.Count - 1)
+            {
+                newMessages[i].NewlyLoadedBottom = true;
+            }
+            messages.Insert(i, newMessages[i]);
+        }
+        StateHasChanged();
+        ScrollToNewlyLoadedBottom();
     }
 }
